@@ -158,9 +158,10 @@ species Building{
 
 experiment NewModel1 type: gui {
 	/** Insert here the definition of the input and output of the model */
-	parameter var:social_dist;
-	parameter var:forced_quar;
-	parameter var:restr_area;
+
+	parameter "social distancing" var:social_dist;
+	parameter "forced quarantine" var:forced_quar;
+	parameter "restricted area" var:restr_area;
 	parameter "Number of initially infected people" var:n;
 	
 	init {
@@ -179,7 +180,7 @@ experiment NewModel1 type: gui {
 			species people;
 			graphics areas { loop area over:locked_areas {draw area color:#transparent border:#black;} }
 		}
-		display chart {
+		display chart type:2d{
 			chart "state dynamic" type:series {
 				loop stt over:["S","I","R"] {data stt value:people count (each.state=stt) color:state_colors[stt];}
 			}

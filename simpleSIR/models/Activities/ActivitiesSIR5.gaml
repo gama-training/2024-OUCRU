@@ -158,6 +158,11 @@ species Building{
 
 experiment NewModel1 type: gui {
 	/** Insert here the definition of the input and output of the model */
+	
+	parameter "social distancing" var:social_dist;
+	parameter "forced quarantine" var:forced_quar;
+	parameter "restricted area" var:restr_area;
+	
 	output {
 		display main {
 			graphics "Drawing roads" {
@@ -169,12 +174,12 @@ experiment NewModel1 type: gui {
 			species people;
 			graphics areas { loop area over:locked_areas {draw area color:#transparent border:#black;} }
 		}
-		display chart {
+		display chart type:2d{
 			chart "state dynamic" type:series {
 				loop stt over:["S","I","R"] {data stt value:people count (each.state=stt) color:state_colors[stt];}
 			}	
 		}
-		display chart2{	
+		display chart2 type:2d{	
 			chart "activity distribution" type: pie{
 				loop act over: ["home","eat","work"] {data act value:people count (each.activity=act);}
 			}
@@ -184,16 +189,18 @@ experiment NewModel1 type: gui {
 
 experiment main type:gui {
 	/* Some code */
-	parameter var:social_dist;
-	parameter var:forced_quar;
-	parameter var:restr_area;
+
+	parameter "social distancing" var:social_dist;
+	parameter "forced quarantine" var:forced_quar;
+	parameter "restricted area" var:restr_area;
 	parameter "Number of initially infected people" var:n;
 }
 
 experiment analysis type:batch until:cycle=100 { 
-	parameter var:social_dist;
-	parameter var:forced_quar;
-	parameter var:restr_area;
+
+	parameter "social distancing" var:social_dist;
+	parameter "forced quarantine" var:forced_quar;
+	parameter "restricted area" var:restr_area;
 	parameter "Number of initially infected people" var:n;
 	parameter param1 var:my_variable among:[1,2,3,4];
 	parameter param2 var:another_variable min:1 max:4;
@@ -201,9 +208,10 @@ experiment analysis type:batch until:cycle=100 {
 
 experiment calibration type:batch until:cycle=100 { 
 	/* Some code */ 
-	parameter var:social_dist;
-	parameter var:forced_quar;
-	parameter var:restr_area;
+
+	parameter "social distancing" var:social_dist;
+	parameter "forced quarantine" var:forced_quar;
+	parameter "restricted area" var:restr_area;
 	parameter "Number of initially infected people" var:n;
 }
 
