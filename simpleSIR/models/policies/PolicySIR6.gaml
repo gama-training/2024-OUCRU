@@ -116,13 +116,19 @@ experiment NewModel1 type: gui {
 	parameter "Number of initially infected people" var:n;
 	
 	output {
-		display main {
+		display main type:2d{
+			graphics areas { 
+				loop area over:locked_areas {
+					draw area color:#white border:#black;
+				}
+			}
 			species people;
-			graphics areas { loop area over:locked_areas {draw area color:#transparent border:#black;} }
 		}
 		display chart type:2d{
 			chart "state dynamic" type:series {
-				loop stt over:["S","I","R"] {data stt value:people count (each.state=stt) color:state_colors[stt];}
+				loop stt over:["S","I","R"] {
+					data stt value:people count (each.state=stt) color:state_colors[stt];
+				}
 			}
 		}
 	}

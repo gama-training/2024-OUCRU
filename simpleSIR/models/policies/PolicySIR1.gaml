@@ -24,8 +24,13 @@ global {
 	map<string,rgb> state_colors <- ["S"::#green,"I"::#red,"R"::#blue];
 
 	init {
+		// HERE: we initialize the social space as the whole world for everybody
 		create people number:100 with:[social_space::world.shape];
-		ask (policy_target*length(people)) among people {social_space <- location;}
+		// Then a certain amount gets their social space limited
+		ask (policy_target*length(people)) among people {
+			social_space <- location;
+		}
+		
 		ask n among people {state <- "I";}
 	}
 	
@@ -44,14 +49,22 @@ species people skills:[moving] {
 	geometry social_space;
 	
 	reflex move {
-		if target=nil {target <- any_location_in(social_space);} 
+		if target=nil {
+			target <- any_location_in(social_space);
+		} 
 		do goto target:target; 
-		if target distance_to self < 1#m {target <- nil; location <- target;}
+		if target distance_to self < 1#m {
+			target <- nil; location <- target;
+		}
  	}
  	
  	reflex infect when:state="I" {
- 		ask people where (each.state="S") at_distance contact_distance { do infected; }
- 		if cycle-cycle_infect >= recovering_time { state <- "R"; }
+ 		ask people where (each.state="S") at_distance contact_distance {
+ 			do infected;
+ 		}
+ 		if cycle-cycle_infect >= recovering_time { 
+ 			state <- "R";
+ 		}
  	}
 	
 	action infected {

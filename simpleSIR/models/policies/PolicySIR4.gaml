@@ -20,7 +20,7 @@ global {
 	// Policies
 	float policy_target <- 0.4;
 	list<geometry> locked_areas;
-	bool quarantine;
+	bool quarantine <- true;
 	
 	float free_riders <- 0.2;
 
@@ -28,12 +28,23 @@ global {
 	map<string,rgb> state_colors <- ["S"::#green,"I"::#red,"R"::#blue];
 
 	init {
-		create people number:100 with:[social_space::world.shape];
-		ask (policy_target*length(people)) among people {social_space <- location;}
+		create people number:100;
+		ask (policy_target*length(people)) among people {
+			maximal_social_space <- location;
+		}
 		locked_areas <- world.shape to_squares (4,true);
-		ask people { if not (social_space is point) { social_space <- locked_areas first_with (each overlaps self); }}
-		ask n among people {state <- "I";}
-		ask (free_riders*length(people)) among people { free_rider <- true; }
+		ask people { 
+			if not (maximal_social_space is point) { 
+				maximal_social_space <- locked_areas first_with (each overlaps self);
+			}
+			current_social_space <- maximal_social_space;
+		}
+		ask n among people {
+			state <- "I";
+		}
+		ask (free_riders*length(people)) among people { 
+			free_rider <- true;
+		}
 	}
 	
 	reflex sim_stop when:people none_matches (each.state="I") {
@@ -48,20 +59,33 @@ species people skills:[moving] {
 	int cycle_infect;
 	
 	point target;
-	geometry social_space;
+	geometry maximal_social_space;
+	geometry current_social_space;
 	
 	bool free_rider <- false;
 	
 	reflex move {
-		if target=nil {target <- any_location_in(free_rider?world.shape:social_space);} 
+		if target=nil {
+			target <- any_location_in(free_rider?world.shape:current_social_space);
+		} 
 		do goto target:target; 
 		if target distance_to self < 1#m {target <- nil; location <- target;}
  	}
  	
  	reflex infect when:state="I" {
- 		if quarantine and not(free_rider) {social_space <- location;}
- 		ask people where (each.state="S") at_distance contact_distance { do infected; }
- 		if cycle-cycle_infect >= recovering_time { state <- "R"; if quarantine {social_space <- world.shape;} }
+ 		if quarantine and not(free_rider) {
+ 			current_social_space <- location;
+ 			target <- nil;
+ 		}
+ 		ask people where (each.state="S") at_distance contact_distance { 
+ 			do infected;
+ 		}
+ 		if cycle-cycle_infect >= recovering_time { 
+ 			state <- "R"; 
+ 			if quarantine {
+ 				current_social_space <- maximal_social_space;
+ 			}
+ 		}
  	}
 	
 	action infected {
@@ -77,13 +101,19 @@ species people skills:[moving] {
 experiment NewModel1 type: gui {
 	/** Insert here the definition of the input and output of the model */
 	output {
-		display main {
+		display main type:2d{
+			graphics areas { 
+				loop area over:locked_areas {
+					draw area color:#white border:#black;
+				}
+			}
 			species people;
-			graphics areas { loop area over:locked_areas {draw area color:#transparent border:#black;} }
 		}
 		display chart type:2d{
 			chart "state dynamic" type:series {
-				loop stt over:["S","I","R"] {data stt value:people count (each.state=stt) color:state_colors[stt];}
+				loop stt over:["S","I","R"] {
+					data stt value:people count (each.state=stt) color:state_colors[stt];
+				}
 			}
 		}
 	}
